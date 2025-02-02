@@ -1,0 +1,38 @@
+  <tr id="product-{{ product.id }}" class="align-middle">
+    <td class="align-middle">{{ product.supplier }}</td>
+    <td class="align-middle">{{ product.name }}</td>
+    <td class="align-middle">{{ product.category }}</td>
+    <td class="align-middle">{{ product.price }}</td>
+    <td class="align-middle">{{ product.weight}}</td>
+    {% if user.role == "customer" %}
+      <td class="align-middle">Quantity</td>
+    {% endif %}
+    <td class="align-middle">
+      <div class="d-flex gap-2 justify-content-end">
+        {% if user.role == "superuser" or user.role == "shop" %}
+        <a href="{% url 'products:product_detail' product.id %}" class="btn btn-sm btn-outline-info">View</a>
+        <a href="{% url 'products:edit_product' product.id %}" class="btn btn-warning"
+          hx-get="{% url 'products:edit_product' product.id %}"
+          hx-target="#edit-product-content"
+          hx-trigger="click"
+          data-bs-toggle="modal"
+          data-bs-target="#editproductModal">
+            Edit
+        </a>
+              <button
+            hx-delete="{% url 'products:htmx_product_delete' product.id %}"
+            hx-target="#product-list"
+            hx-swap="outerHTML"
+            hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'
+            class="btn btn-sm btn-outline-danger"
+            hx-on::after-request="this.closest('tr').remove();">
+            Delete
+        </button>
+        {% elif user.role == "customer" %}
+          <a href="{% url 'products:product_detail' product.id %}" class="btn btn-sm btn-outline-success">Buy</a>
+        {% endif %}
+      </div>
+    </td>
+</tr>
+
+

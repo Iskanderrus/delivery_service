@@ -81,7 +81,7 @@ class DriverProfileForm(forms.ModelForm):
         fields = ["vehicle_type", "capacity"]
 
     def clean_capacity(self):
-        capacity = self.cleaned_data.get('capacity')
+        capacity = self.cleaned_data.get("capacity")
         if capacity <= 0:
             raise forms.ValidationError("Capacity must be a positive number.")
         return capacity
@@ -90,10 +90,10 @@ class DriverProfileForm(forms.ModelForm):
 class CustomerProfileForm(forms.ModelForm):
     class Meta:
         model = CustomerProfile
-        fields = ["payment_methods"]
+        fields = ["payment_methods", "address"]
 
 
 class ShopProfileForm(forms.ModelForm):
     class Meta:
         model = ShopProfile
-        fields = ["product_categories", "accepted_payment_methods"]
+        fields = ["product_categories", "accepted_payment_methods", "address"]

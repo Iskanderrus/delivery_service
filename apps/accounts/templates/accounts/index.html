@@ -10,15 +10,19 @@
         <p class="lead">Hello, {{ user.username }}!</p>
         <a href="{% url 'accounts:logout' %}" class="btn btn-danger">Logout</a>
         {% if user.is_superuser %}
+        <p>Superuser profile</p>
             <a href="{% url 'accounts:create_user' %}" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#createUserModal">Add a user</a>
             <a href="{% url 'accounts:user-list-page' %}" class="btn btn-primary">Users API</a>
         {% elif user.role == 'shop' %}
+        <p>Shop profile</p>
         <a href="#" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#createUserModal">Add a product</a>
         <a href="#" class="btn btn-warning">View Products</a>
         <a href="#" class="btn btn-primary">View Orders</a>
         {% elif user.role == 'driver' %}
+        <p>Driver profile</p>
         <a href="#" class="btn btn-primary">View Orders</a>
         {% elif user.role == 'customer' %}
+        <p>Customer profile</p>
         <a href="#" class="btn btn-warning">View Products</a>
         <a href="#" class="btn btn-success">Create Order</a>
         <a href="#" class="btn btn-primary">View Orders</a>

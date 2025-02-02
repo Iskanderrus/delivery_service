@@ -18,10 +18,11 @@ class Product(models.Model):
     class Meta:
         constraints = (
             CheckConstraint(
-                check=Q(weight__gte=0.0) & Q(weight__lte=1.0),
+                check=Q(weight__gte=0.0) & Q(weight__lte=100.0),
                 name="weight_range",
             ),
         )
+        indexes = [models.Index(fields=["supplier", "category"])]
 
     name = models.CharField(max_length=100)
     category = models.ForeignKey(Category, on_delete=models.CASCADE, null=True)

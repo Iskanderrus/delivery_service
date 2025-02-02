@@ -194,6 +194,7 @@ class CustomerProfile(models.Model):
     payment_methods = models.JSONField(
         help_text="List of payment methods", default=list
     )
+    address = models.CharField(_("address"), max_length=200, null=True)
 
     def clean(self):
         if self.user.role != "customer":
@@ -224,6 +225,7 @@ class ShopProfile(models.Model):
     accepted_payment_methods = models.JSONField(
         help_text="Accepted payment methods", default=list
     )
+    address = models.CharField(_("address"), max_length=200, null=True)
 
     def clean(self):
         if self.user.role != "shop":

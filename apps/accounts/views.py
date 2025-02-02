@@ -3,14 +3,12 @@ import logging
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required, user_passes_test
-from django.contrib.auth.hashers import make_password
 from django.http import HttpResponse, HttpResponseForbidden, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.template.loader import render_to_string
 from django.views.decorators.http import require_http_methods, require_POST
 from rest_framework import permissions, viewsets
-from rest_framework.decorators import action, api_view
-from rest_framework.parsers import JSONParser
+from rest_framework.decorators import action
 from rest_framework.response import Response
 
 from apps.accounts.forms import (
@@ -238,7 +236,7 @@ def edit_profile(request, pk):
         form = form_class(request.POST, instance=profile)
         if form.is_valid():
             form.save()
-            return user_detail(request, pk) # render the full user detail view on success
+            return user_detail(request, pk)
     else:
         form = form_class(instance=profile)
 
