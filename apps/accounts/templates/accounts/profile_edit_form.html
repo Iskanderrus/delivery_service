@@ -1,0 +1,21 @@
+<div class="container mt-4">
+<form hx-post="{% url 'accounts:edit_profile' user.pk %}" hx-target="#user-detail-container" hx-swap="outerHTML">
+    {% csrf_token %}
+    {{ form.as_p }}
+
+    {% if form.errors %}
+        <div class="alert alert-danger">
+            <ul>
+                {% for field in form %}
+                    {% for error in field.errors %}
+                        <li>{{ error }}</li>
+                    {% endfor %}
+                {% endfor %}
+            </ul>
+        </div>
+    {% endif %}
+    
+    <button type="submit" class="btn btn-success">Save</button>
+    <button type="button" class="btn btn-secondary" hx-get="{% url 'accounts:user_detail' user.pk %}" hx-swap="outerHTML">Cancel</button>
+</form>
+</div>

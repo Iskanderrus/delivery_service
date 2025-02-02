@@ -4,6 +4,7 @@ from rest_framework.routers import DefaultRouter
 from .views import (
     CustomUserViewSet,
     create_user,
+    edit_profile,
     htmx_user_delete,
     user_detail,
     htmx_user_list,
@@ -37,7 +38,7 @@ urlpatterns = [
     path("users/<int:pk>/user_detail/", user_detail, name="user_detail"),
     path("users/htmx_list/", htmx_user_list, name="htmx_user_list"),
     path("users/create_user/", create_user, name="create_user"),
-
     path("users/edit_user/<int:pk>/", edit_user, name="edit_user"),
+    path("users/edit_profile/<int:pk>/", edit_profile, name="edit_profile"),
     path("users/htmx_delete/<int:pk>/", htmx_user_delete, name="htmx_user_delete"),
 ]

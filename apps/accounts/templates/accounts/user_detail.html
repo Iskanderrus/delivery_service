@@ -1,65 +1,109 @@
 {% extends 'base.html' %}
 {% block content %}
-<div class="card shadow-sm">
-    <div class="card-header bg-primary text-white">
-      <h2 class="m-0">{{ user.username }}</h2>
-    </div>
-    <div class="card-body">
-      <div class="row mb-3">
-        <div class="col-sm-4 fw-bold">Email:</div>
-        <div class="col-sm-8">{{ user.email }}</div>
-      </div>
-      <div class="row mb-3">
-        <div class="col-sm-4 fw-bold">First Name:</div>
-        <div class="col-sm-8">{{ user.first_name }}</div>
-      </div>
-      {% if user.last_name %}
-          <div class="row mb-3">
-            <div class="col-sm-4 fw-bold">Last Name:</div>
-            <div class="col-sm-8">{{ user.last_name }}</div>
-          </div>
-      {% endif %}
-      {% if user.company_name %}
-          <div class="row mb-3">
-            <div class="col-sm-4 fw-bold">Company Name:</div>
-            <div class="col-sm-8">{{ user.company_name }}</div>
-          </div>
-      {% endif %}
-
-      <div class="row mb-3">
-        <div class="col-sm-4 fw-bold">Role:</div>
-        <div class="col-sm-8">
-            <span class="badge {% if user.role == 'shop' %}bg-primary{% elif user.role == 'driver' %}bg-success{% elif user.role == 'customer' %}bg-info{% elif user.role == 'admin' %}bg-warning{% else %}bg-secondary{% endif %}">{{ user.role|title }}</span>
+<div id="user-detail-container">
+    <div class="card shadow-sm">
+        <div class="card-header bg-primary text-white">
+          <h2 class="m-0">{{ user.username }}</h2>
         </div>
-      </div>
-
-      <div class="row mb-3">
-          <div class="col-sm-4 fw-bold">Status:</div>
-          <div class="col-sm-8">
-              <span class="badge {% if user.is_active %}bg-success{% else %}bg-danger{% endif %}">
-                  {% if user.is_active %}Active{% else %}Inactive{% endif %}
-              </span>
+        <div class="card-body">
+          <div class="row mb-3">
+            <div class="col-sm-4 fw-bold">Email:</div>
+            <div class="col-sm-8">{{ user.email }}</div>
           </div>
-      </div>
-
-        <div class="row mb-3">
-            <div class="col-sm-4 fw-bold">Staff Status:</div>
-              <div class="col-sm-8">
-                <span class="badge {% if user.is_staff %}bg-success{% else %}bg-danger{% endif %}">
-                    {% if user.is_staff %}Staff{% else %}Not Staff{% endif %}
-                 </span>
+          <div class="row mb-3">
+            <div class="col-sm-4 fw-bold">First Name:</div>
+            <div class="col-sm-8">{{ user.first_name }}</div>
+          </div>
+          {% if user.last_name %}
+              <div class="row mb-3">
+                <div class="col-sm-4 fw-bold">Last Name:</div>
+                <div class="col-sm-8">{{ user.last_name }}</div>
               </div>
+          {% endif %}
+          {% if user.company_name %}
+              <div class="row mb-3">
+                <div class="col-sm-4 fw-bold">Company Name:</div>
+                <div class="col-sm-8">{{ user.company_name }}</div>
+              </div>
+          {% endif %}
+    
+          <div class="row mb-3">
+            <div class="col-sm-4 fw-bold">Role:</div>
+            <div class="col-sm-8">
+                <span class="badge {% if user.role == 'shop' %}bg-primary{% elif user.role == 'driver' %}bg-success{% elif user.role == 'customer' %}bg-info{% elif user.role == 'admin' %}bg-warning{% else %}bg-secondary{% endif %}">{{ user.role|title }}</span>
+            </div>
           </div>
-
-      <div class="row mb-3">
-          <div class="col-sm-4 fw-bold">Superuser Status:</div>
+    
+          <div class="row mb-3">
+              <div class="col-sm-4 fw-bold">Status:</div>
               <div class="col-sm-8">
-                <span class="badge {% if user.is_superuser %}bg-success{% else %}bg-danger{% endif %}">
-                    {% if user.is_superuser %}Superuser{% else %}Not Superuser{% endif %}
+                  <span class="badge {% if user.is_active %}bg-success{% else %}bg-danger{% endif %}">
+                      {% if user.is_active %}Active{% else %}Inactive{% endif %}
                   </span>
               </div>
           </div>
-
+    
+          <div class="row mb-3">
+              <div class="col-sm-4 fw-bold">Staff Status:</div>
+              <div class="col-sm-8">
+                  <span class="badge {% if user.is_staff %}bg-success{% else %}bg-danger{% endif %}">
+                      {% if user.is_staff %}Staff{% else %}Not Staff{% endif %}
+                  </span>
+              </div>
+          </div>
+    
+          <div class="row mb-3">
+              <div class="col-sm-4 fw-bold">Superuser Status:</div>
+              <div class="col-sm-8">
+                  <span class="badge {% if user.is_superuser %}bg-success{% else %}bg-danger{% endif %}">
+                      {% if user.is_superuser %}Superuser{% else %}Not Superuser{% endif %}
+                  </span>
+              </div>
+          </div>
+    
+          {% if profile %}
+          <hr>
+          <h4>Profile Details</h4>
+          {% if user.role == "driver" %}
+              <div class="row mb-3">
+                  <div class="col-sm-4 fw-bold">Vehicle Type:</div>
+                  <div class="col-sm-8">{{ profile.vehicle_type }}</div>
+              </div>
+              <div class="row mb-3">
+                  <div class="col-sm-4 fw-bold">Capacity:</div>
+                  <div class="col-sm-8">{{ profile.capacity }} kg/liters</div>
+              </div>
+          {% elif user.role == "customer" %}
+              <div class="row mb-3">
+                  <div class="col-sm-4 fw-bold">Payment Methods:</div>
+                  <div class="col-sm-8">{{ profile.payment_methods|join:", " }}</div>
+              </div>
+          {% elif user.role == "shop" %}
+              <div class="row mb-3">
+                  <div class="col-sm-4 fw-bold">Product Categories:</div>
+                  <div class="col-sm-8">
+                      {% for category in profile.product_categories.all %}
+                          <span class="badge bg-secondary">{{ category.name }}</span>
+                      {% endfor %}
+                  </div>
+              </div>
+              <div class="row mb-3">
+                  <div class="col-sm-4 fw-bold">Accepted Payment Methods:</div>
+                  <div class="col-sm-8">{{ profile.accepted_payment_methods|join:", " }}</div>
+              </div>
+          {% endif %}
+    
+          <!-- Edit Profile Button -->
+          <div class="mt-3">
+              <button class="btn btn-warning" hx-get="{% url 'accounts:edit_profile' user.pk %}" hx-target="#profile-edit-form" hx-swap="outerHTML">
+                  Edit Profile
+              </button>
+          </div>
+    
+          <!-- Placeholder for HTMX profile editing -->
+          <div id="profile-edit-form"></div>
+          {% endif %}
+        </div>
     </div>
-  </div>
-{% endblock content %}
+</div>
+{% endblock %}

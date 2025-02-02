@@ -2,7 +2,7 @@ from django import forms
 from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError
 
-from .models import CustomUser
+from .models import CustomerProfile, CustomUser, DriverProfile, ShopProfile
 
 
 class CustomUserCreationForm(forms.ModelForm):
@@ -73,3 +73,27 @@ class LoginForm(forms.Form):
             }
         )
     )
+
+
+class DriverProfileForm(forms.ModelForm):
+    class Meta:
+        model = DriverProfile
+        fields = ["vehicle_type", "capacity"]
+
+    def clean_capacity(self):
+        capacity = self.cleaned_data.get('capacity')
+        if capacity <= 0:
+            raise forms.ValidationError("Capacity must be a positive number.")
+        return capacity
+
+
+class CustomerProfileForm(forms.ModelForm):
+    class Meta:
+        model = CustomerProfile
+        fields = ["payment_methods"]
+
+
+class ShopProfileForm(forms.ModelForm):
+    class Meta:
+        model = ShopProfile
+        fields = ["product_categories", "accepted_payment_methods"]

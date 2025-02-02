@@ -1,9 +1,11 @@
 import logging
+
 from django.contrib.auth.models import AbstractUser, BaseUserManager, PermissionsMixin
 from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError
 from django.core.validators import validate_email
 from django.db import models
+from django.db.models import CheckConstraint, Q
 from django.utils.translation import gettext_lazy as _
 
 logger = logging.getLogger(__name__)
@@ -97,6 +99,28 @@ class CustomUserManager(BaseUserManager):
 
 
 class CustomUser(AbstractUser, PermissionsMixin):
+    class Meta:
+        verbose_name = _("user")
+        verbose_name_plural = _("users")
+        ordering = ["-date_joined"]
+        indexes = [models.Index(fields=["email", "username"])]
+        constraints = [
+            CheckConstraint(
+                check=Q(
+                    role__in=[
+                        choice[0]
+                        for choice in [
+                            ("shop", "Shop"),
+                            ("driver", "Driver"),
+                            ("admin", "Admin"),
+                            ("customer", "Customer"),
+                        ]
+                    ]
+                ),
+                name="role_check",
+            )
+        ]
+
     email = models.EmailField(_("email address"), unique=True)
     username = models.CharField(_("username"), max_length=150, unique=True)
     first_name = models.CharField(_("first name"), max_length=100)
@@ -126,3 +150,87 @@ class CustomUser(AbstractUser, PermissionsMixin):
 
     def __str__(self):
         return self.username
+
+
+class DriverProfile(models.Model):
+    user = models.OneToOneField(
+        CustomUser,
+        on_delete=models.CASCADE,
+        related_name="driver_profile",
+        limit_choices_to={"role": "driver"},
+    )
+    vehicle_type = models.CharField(max_length=50)
+    capacity = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        help_text="Capacity in kg or liters",
+        default=10,
+    )
+
+    def clean(self):
+        if self.user.role != "driver":
+            raise ValidationError(
+                "Only users with the 'driver' role can have a DriverProfile."
+            )
+
+    def save(self, *args, **kwargs):
+        self.clean()
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return f"{self.user.username} - {self.vehicle_type}"
+
+
+class CustomerProfile(models.Model):
+    user = models.OneToOneField(
+        CustomUser,
+        on_delete=models.CASCADE,
+        related_name="customer_profile",
+        limit_choices_to={"role": "customer"},
+    )
+    payment_methods = models.JSONField(
+        help_text="List of payment methods", default=list
+    )
+
+    def clean(self):
+        if self.user.role != "customer":
+            raise ValidationError("User role must be 'customer' for CustomerProfile.")
+
+    def save(self, *args, **kwargs):
+        self.clean()
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return f"{self.user.username} - Customer"
+
+
+def get_category_model():
+    from apps.products.models import Category
+
+    return Category
+
+
+class ShopProfile(models.Model):
+    user = models.OneToOneField(
+        CustomUser,
+        on_delete=models.CASCADE,
+        related_name="shop_profile",
+        limit_choices_to={"role": "shop"},
+    )
+    product_categories = models.ManyToManyField(get_category_model(), blank=True)
+    accepted_payment_methods = models.JSONField(
+        help_text="Accepted payment methods", default=list
+    )
+
+    def clean(self):
+        if self.user.role != "shop":
+            raise ValidationError(
+                "Only users with the 'shop' role can have a ShopProfile."
+            )
+
+    def save(self, *args, **kwargs):
+        self.clean()
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return f"{self.user.username} - Shop"

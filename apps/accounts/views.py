@@ -13,7 +13,13 @@ from rest_framework.decorators import action, api_view
 from rest_framework.parsers import JSONParser
 from rest_framework.response import Response
 
-from apps.accounts.forms import CustomUserCreationForm, LoginForm
+from apps.accounts.forms import (
+    CustomUserCreationForm,
+    CustomerProfileForm,
+    DriverProfileForm,
+    LoginForm,
+    ShopProfileForm,
+)
 
 from .models import CustomUser
 from .serializers import CustomUserSerializer
@@ -136,7 +142,18 @@ def htmx_user_list(request):
 
 def user_detail(request, pk):
     user = get_object_or_404(CustomUser, pk=pk)
-    return render(request, "accounts/user_detail.html", {"user": user})
+
+    profile = None
+    if user.role == "driver":
+        profile = getattr(user, "driver_profile", None)
+    elif user.role == "customer":
+        profile = getattr(user, "customer_profile", None)
+    elif user.role == "shop":
+        profile = getattr(user, "shop_profile", None)
+
+    return render(
+        request, "accounts/user_detail.html", {"user": user, "profile": profile}
+    )
 
 
 def superuser_required(view_func):
@@ -198,6 +215,35 @@ def edit_user(request, pk):
         request,
         "accounts/partials/edit_user.html",
         {"form": form, "user": user},
+    )
+
+@login_required
+@superuser_required
+def edit_profile(request, pk):
+    user = get_object_or_404(CustomUser, pk=pk)
+
+    if user.role == "driver":
+        profile = getattr(user, "driver_profile", None)
+        form_class = DriverProfileForm
+    elif user.role == "customer":
+        profile = getattr(user, "customer_profile", None)
+        form_class = CustomerProfileForm
+    elif user.role == "shop":
+        profile = getattr(user, "shop_profile", None)
+        form_class = ShopProfileForm
+    else:
+        return HttpResponse("Invalid user role", status=400)
+
+    if request.method == "POST":
+        form = form_class(request.POST, instance=profile)
+        if form.is_valid():
+            form.save()
+            return user_detail(request, pk) # render the full user detail view on success
+    else:
+        form = form_class(instance=profile)
+
+    return render(
+        request, "accounts/profile_edit_form.html", {"form": form, "user": user}
     )
 
 
