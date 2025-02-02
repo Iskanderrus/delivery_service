@@ -1,3 +1,5 @@
-{% for user in users %}
-    {% include "accounts/partials/user_row.html" %}
-{% endfor %}
+<table class="table">
+    {% for user in users %}
+            {% include "accounts/partials/user_row.html" %}
+    {% endfor %}
+</table>

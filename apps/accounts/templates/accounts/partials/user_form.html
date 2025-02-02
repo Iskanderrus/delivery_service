@@ -1,20 +1,64 @@
-<form hx-post="/api/users/htmx_create/" hx-target="#user-table" hx-swap="beforeend">
+<form hx-post="{% url 'accounts:create_user' %}" hx-target="#user-list" hx-swap="outerHTML">
     {% csrf_token %}
-    <label>Username:</label>
-    <input type="text" name="username" required><br>
+    <div class="mb-3">
+        <label for="id_username-create" class="form-label">Username</label>
+        <input type="text" name="username" id="id_username-create" class="form-control" required placeholder="Enter username">
+        {% if form.errors.username %}
+            <div class="invalid-feedback">
+                {{ form.errors.username.0 }}
+            </div>
+         {% endif %}
+    </div>
 
-    <label>Email:</label>
-    <input type="email" name="email" required><br>
+    <div class="mb-3">
+        <label for="id_email-create" class="form-label">Email</label>
+        <input type="email" name="email" id="id_email-create" class="form-control" required placeholder="Enter email">
+        {% if form.errors.email %}
+            <div class="invalid-feedback">
+                {{ form.errors.email.0 }}
+            </div>
+         {% endif %}
+    </div>
 
-    <label>Password:</label>
-    <input type="password" name="password" required><br>
+    <div class="mb-3">
+        <label for="id_first_name-create" class="form-label">First Name</label>
+        <input type="text" name="first_name" id="id_first_name-create" class="form-control" required placeholder="Enter First name">
+           {% if form.errors.first_name %}
+            <div class="invalid-feedback">
+                {{ form.errors.first_name.0 }}
+            </div>
+         {% endif %}
+    </div>
 
-    <label>Role:</label>
-    <select name="role">
-        <option value="shop">Shop</option>
-        <option value="driver">Driver</option>
-        <option value="admin">Admin</option>
-    </select><br>
+    <div class="mb-3">
+        <label for="id_password-create" class="form-label">Password</label>
+        <input type="password" name="password" id="id_password-create" class="form-control" required placeholder="Enter password">
+           {% if form.errors.password %}
+            <div class="invalid-feedback">
+                {{ form.errors.password.0 }}
+            </div>
+         {% endif %}
+    </div>
 
-    <button type="submit">Save</button>
+    <div class="mb-3">
+        <label for="id_role-create" class="form-label">Role</label>
+        <select name="role" id="id_role-create" class="form-select">
+            <option value="shop">Shop</option>
+            <option value="driver">Driver</option>
+            <option value="customer">Customer</option>
+        </select>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Save</button>
 </form>
+
+<script>
+    document.addEventListener("htmx:afterSwap", function(event) {
+        if (event.detail.target.id === "user-list") {
+            var modal = bootstrap.Modal.getInstance(document.getElementById('createUserModal'));
+            if (modal) {
+                modal.hide();
+            }
+        }
+    });
+</script>

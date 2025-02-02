@@ -1,4 +1,4 @@
-<form hx-post="{% url 'login_user' %}" class="p-4 border rounded shadow-sm w-100" style="max-width: 400px; margin: 0 auto;">
+<form hx-post="{% url 'accounts:login_user' %}"  class="p-4 border rounded shadow-sm w-100" style="max-width: 400px; margin: 0 auto;">
     {% csrf_token %}
     {% if form.errors %}
         <div class="alert alert-danger">

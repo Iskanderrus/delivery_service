@@ -6,11 +6,6 @@ from .models import CustomUser
 
 
 class CustomUserCreationForm(forms.ModelForm):
-    """
-    A custom form to create users, based on the CustomUser model.
-    This form has custom validations and error handling.
-    """
-
     password = forms.CharField(
         widget=forms.PasswordInput(),
         required=True,
@@ -18,17 +13,26 @@ class CustomUserCreationForm(forms.ModelForm):
     )
 
     class Meta:
-        """
-        Meta class to define fields of the form and the model it uses
-        """
-
         model = CustomUser
-        fields = ("email", "username", "first_name", "role")
+        fields = ["username", "email", "first_name", "last_name", "role"]
+
+    def __init__(self, *args, **kwargs):
+        instance = kwargs.get("instance", None)
+        super().__init__(*args, **kwargs)
+
+        if instance:
+            self.fields.pop("password")
+
+            for field in self.fields.values():
+                field.label = None
+
+            self.fields["role"].choices = [
+                choice for choice in self.fields["role"].choices if choice[0] != "admin"
+            ]
+        else:
+            self.fields["role"].initial = "shop"
 
     def clean_password(self):
-        """
-        A method to validate password, with custom validations if needed
-        """
         password = self.cleaned_data.get("password")
         try:
             validate_password(password)
@@ -38,12 +42,10 @@ class CustomUserCreationForm(forms.ModelForm):
         return password
 
     def save(self, commit=True):
-        """
-        A method to save the form data, and set the password before saving.
-        """
         user = super().save(commit=False)
         password = self.cleaned_data.get("password")
-        user.set_password(password)
+        if password:
+            user.set_password(password)
         if commit:
             user.save()
         return user

@@ -3,11 +3,11 @@ from rest_framework.routers import DefaultRouter
 
 from .views import (
     CustomUserViewSet,
-    htmx_user_create,
+    create_user,
     htmx_user_delete,
-    htmx_user_detail,
+    user_detail,
     htmx_user_list,
-    htmx_user_update,
+    edit_user,
     index_page,
     login_page,
     login_user,
@@ -16,6 +16,8 @@ from .views import (
     register_user,
     user_list_page,
 )
+
+app_name = "accounts"
 
 # Create a router for the API viewset
 router = DefaultRouter()
@@ -32,9 +34,10 @@ urlpatterns = [
     path("accounts/login-user/", login_user, name="login_user"),
     path("accounts/logout/", logout_user, name="logout"),
     # HTMX URLs for user actions
-    path("users/<int:pk>/htmx_detail/", htmx_user_detail, name="htmx_user_detail"),
+    path("users/<int:pk>/user_detail/", user_detail, name="user_detail"),
     path("users/htmx_list/", htmx_user_list, name="htmx_user_list"),
-    path("users/htmx_create/", htmx_user_create, name="htmx_user_create"),
-    path("users/htmx_update/<int:pk>/", htmx_user_update, name="htmx_user_update"),
+    path("users/create_user/", create_user, name="create_user"),
+
+    path("users/edit_user/<int:pk>/", edit_user, name="edit_user"),
     path("users/htmx_delete/<int:pk>/", htmx_user_delete, name="htmx_user_delete"),
 ]

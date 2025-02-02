@@ -1,11 +1,13 @@
 import logging
+
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib.auth.hashers import make_password
-from django.http import HttpResponse, JsonResponse
+from django.http import HttpResponse, HttpResponseForbidden, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.template.loader import render_to_string
+from django.views.decorators.http import require_http_methods, require_POST
 from rest_framework import permissions, viewsets
 from rest_framework.decorators import action, api_view
 from rest_framework.parsers import JSONParser
@@ -18,9 +20,10 @@ from .serializers import CustomUserSerializer
 
 logger = logging.getLogger(__name__)
 
+
 def index_page(request):
-    users = CustomUser.objects.all()
-    return render(request, "accounts/index.html", {"users": users})
+    # users = CustomUser.objects.all()
+    return render(request, "accounts/index.html")#, {"users": users})
 
 
 class CustomUserViewSet(viewsets.ModelViewSet):
@@ -62,6 +65,7 @@ def register_page(request):
     return render(request, "accounts/auth/register.html", {"form": form})
 
 
+@require_POST
 def register_user(request):
     if request.method == "POST":
         form = CustomUserCreationForm(request.POST)
@@ -74,7 +78,6 @@ def register_user(request):
         else:
             logger.debug(f"Form errors: {form.errors}")
             logger.debug(f"Request POST: {request.POST}")
-            # Return just the form HTML fragment
             form_html = render_to_string(
                 "accounts/auth/partials/register_form.html", {"form": form}, request
             )
@@ -87,26 +90,27 @@ def login_page(request):
     return render(request, "accounts/auth/login.html", {"form": form})
 
 
+@require_POST
 def login_user(request):
-    if request.method == "POST":
-        username = request.POST.get("email")
-        password = request.POST.get("password")
-        user = authenticate(request, username=username, password=password)
-
+    form = LoginForm(request.POST)
+    if form.is_valid():
+        email = form.cleaned_data["email"]
+        password = form.cleaned_data["password"]
+        user = authenticate(request, email=email, password=password)
         if user is not None:
             login(request, user)
-            messages.success(request, "Login successful!")
-            return redirect("/")
+            response = HttpResponse(status=204)
+            response["HX-Redirect"] = "/"
+            return response
         else:
-            messages.error(request, "Invalid username or password.")
-            # Return just the form HTML fragment
-            form = LoginForm(request.POST)
-            form_html = render_to_string(
-                "accounts/auth/partials/login_form.html", {"form": form}, request
-            )
-            return JsonResponse({"success": False, "form_html": form_html}, status=400)
+            messages.error(request, "Invalid login credentials")
     else:
-        return JsonResponse({"success": False}, status=400)
+        messages.error(request, "Invalid form")
+
+    form_html = render_to_string(
+        "accounts/auth/partials/login_form.html", {"form": form}, request
+    )
+    return JsonResponse({"success": False, "form_html": form_html}, status=400)
 
 
 @login_required
@@ -116,62 +120,101 @@ def logout_user(request):
 
 
 def user_list_page(request):
-    users = CustomUser.objects.all()
+    if request.user.is_authenticated():
+        if request.user.is_superuser():
+            users = CustomUser.objects.filter(is_active=True)
     return render(request, "accounts/user_list.html", {"users": users})
 
 
 def htmx_user_list(request):
-    """Returns a partial HTML template with the list of users for HTMX"""
-    users = CustomUser.objects.all()
-    return render(request, "accounts/partials/user_list.html", {"users": users})
+    """Returns a list of users via HTMX, filtered to active users, only for superusers"""
+    if request.user.is_superuser:
+        users = CustomUser.objects.filter(is_active=True)
+        return render(request, "accounts/partials/user_list.html", {"users": users})
+    else:
+        return HttpResponseForbidden("You do not have permission to view this page.")
 
 
-def htmx_user_detail(request, pk):
-    """Returns partial HTML template for user details for HTMX"""
+def user_detail(request, pk):
     user = get_object_or_404(CustomUser, pk=pk)
-    return render(request, "accounts/partials/user_detail.html", {"user": user})
+    return render(request, "accounts/user_detail.html", {"user": user})
 
 
-def htmx_user_create(request):
-    """Handles user creation via HTMX"""
+def superuser_required(view_func):
+    return user_passes_test(lambda u: u.is_superuser)(view_func)
+
+
+@login_required
+@superuser_required
+def create_user(request):
     if request.method == "POST":
-        data = request.POST
-        # Manually hash the password before saving
-        password = data.get("password")
-        if password:
-            data["password"] = make_password(
-                password
-            )  # Django's make_password function hashes the password
+        form = CustomUserCreationForm(request.POST)
+        if form.is_valid():
+            username = form.cleaned_data.get("username")
+            email = form.cleaned_data.get("email")
 
-        serializer = CustomUserSerializer(data=data)
-        if serializer.is_valid():
-            user = serializer.save()
-            return render(request, "accounts/partials/user_row.html", {"user": user})
-        return JsonResponse(
-            {"error": "Invalid data", "details": serializer.errors}, status=400
+            if CustomUser.objects.filter(username=username).exists():
+                form.add_error("username", "A user with this username already exists.")
+            elif CustomUser.objects.filter(email=email).exists():
+                form.add_error("email", "A user with this email already exists.")
+            else:
+                user = form.save(commit=False)
+                if user.is_superuser or user.is_staff:
+                    messages.error(
+                        request, "You cannot create a superuser with this form."
+                    )
+                else:
+                    user.save()
+                    messages.success(request, "User created successfully.")
+                    users = CustomUser.objects.filter(is_active=True)
+
+                    return render(
+                        request,
+                        "accounts/partials/user_list.html",
+                        {"users": users, "close_modal": True},
+                    )
+    else:
+        form = CustomUserCreationForm()
+
+    return render(request, "admin/create_user.html", {"form": form})
+
+
+@login_required
+@superuser_required
+def edit_user(request, pk):
+    user = get_object_or_404(CustomUser, id=pk)
+
+    if request.method == "GET":
+        form = CustomUserCreationForm(instance=user)
+        return render(
+            request, "accounts/partials/edit_user.html", {"form": form, "user": user}
         )
-    return JsonResponse({"error": "Invalid request method"}, status=405)
+
+    elif request.method == "POST":
+        form = CustomUserCreationForm(request.POST, instance=user)
+        if form.is_valid():
+            user = form.save()
+            users = CustomUser.objects.filter(is_active=True)
+
+            return render(
+                request,
+                "accounts/partials/user_row.html",
+                {"user": user, "users": users},
+            )
+        else:
+            return render(
+                request,
+                "accounts/partials/edit_user.html",
+                {"form": form, "user": user},
+            )
 
 
-@api_view(["PUT"])
-def htmx_user_update(request, pk):
-    """Handles user update via HTMX"""
-    user = get_object_or_404(CustomUser, pk=pk)
-    data = JSONParser().parse(request)
-    serializer = CustomUserSerializer(user, data=data, partial=True)
-    if serializer.is_valid():
-        user = serializer.save()
-        return render(request, "accounts/partials/user_row.html", {"user": user})
-    return JsonResponse(
-        {"error": "Invalid data", "details": serializer.errors}, status=400
-    )
-
-
-@api_view(["DELETE"])
+@require_http_methods(["DELETE"])
 def htmx_user_delete(request, pk):
     """Handles user deletion via HTMX"""
     user = get_object_or_404(CustomUser, pk=pk)
     user.is_active = False
     user.save()
-    users = CustomUser.objects.all()
+
+    users = CustomUser.objects.filter(is_active=True)
     return render(request, "accounts/partials/user_list.html", {"users": users})
