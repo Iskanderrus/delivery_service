@@ -1,0 +1,84 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.so
+
+# Virtual environment
+venv/
+.venv/
+env/
+.env/
+
+# Distribution / packaging
+dist/
+build/
+*.egg
+*.whl
+*.tar.gz
+*.zip
+
+# User settings
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+
+# Testing
+*.log
+*.out
+coverage/
+.coverage
+nosetests.xml
+pytest_cache/
+htmlcov/
+
+# Database files
+*.sqlite
+*.db
+*.psql
+# We will handle postgres_data, pgadmin_data and redis_data below
+
+# Media and static files (adjust as needed)
+media/
+static/
+
+# Django-specific ignores
+# *.pyc & __pycache__ handled above
+# db.sqlite3 handled above
+*.pot
+*.mo
+
+# Sensitive Local Settings (crucial for excluding secrets!)
+settings/local_settings.py
+settings/*.local.py  # If you have different local settings files
+*/local_settings.py # Catch local settings at different locations
+local_settings.py   # If local_settings is not located in settings folder.
+
+# Sensitive files and directories (explicitly added here):
+.env
+.env.*
+.devcontainer
+.github
+secrets.json
+credentials.json
+settings.py
+
+# Docker-related build artifacts
+# Dockerfile* & docker-compose* should not be ignored
+.dockerignore
+
+# Migrations
+apps/*/migrations/*
+!apps/*/migrations/__init__.py
+
+#Data directories (if using volume mounts)
+postgres_data/* 
+pgadmin_data/* 
+redis_data/*
+
+#Other directories and files, as required
+.DS_Store

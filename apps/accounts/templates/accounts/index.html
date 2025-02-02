@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+
+{% block page_title %}Home - OnlineShopper{% endblock page_title %}
+
+{% block content %}
+<div class="container text-center mt-5">
+    <h1>Welcome to OnlineShopper</h1>
+    
+    {% if user.is_authenticated %}
+        <p class="lead">Hello, {{ user.username }}!</p>
+        <a href="{% url 'logout' %}" class="btn btn-danger">Logout</a>
+        {% if user.is_superuser %}
+            <a href="{% url 'user-list-page' %}" class="btn btn-primary">Users API</a>
+        {% endif %}
+    {% else %}
+        <p class="lead">Sign up or log in to access more features.</p>
+        <a href="#" class="btn btn-success" hx-get="{% url 'login' %}" hx-target="#auth-forms-container" hx-swap="innerHTML" hx-on::before-request="clearForms()">Login</a>
+        <a href="#" class="btn btn-primary" hx-get="{% url 'register' %}" hx-target="#auth-forms-container" hx-swap="innerHTML" hx-on::before-request="clearForms()">Register</a>
+
+        <!-- Container for forms to be rendered by HTMX -->
+        <div id="auth-forms-container"></div>
+    {% endif %}
+    
+    {% if user.is_superuser %}
+        <hr>
+        <h2>Users List</h2>
+        <div id="user-list" hx-get="{% url 'htmx_user_list' %}" hx-trigger="load" hx-target="#user-list">
+            <p>Loading users...</p>
+        </div>
+    {% endif %}
+</div>
+
+<script>
+    function clearForms() {
+        const container = document.getElementById('auth-forms-container');
+        container.innerHTML = "";
+    }
+</script>
+{% endblock content %}

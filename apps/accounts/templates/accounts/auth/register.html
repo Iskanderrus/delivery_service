@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+
+{% block page_title %}Register{% endblock %}
+
+{% block content %}
+    <h2>Register</h2>
+    <div id="registration-form" hx-target="this" hx-swap="outerHTML">
+        {% include "accounts/auth/partials/register_form.html" %}
+    </div>
+{% endblock %}

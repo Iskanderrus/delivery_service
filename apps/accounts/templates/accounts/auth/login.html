@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+
+{% block page_title %}Login{% endblock %}
+
+{% block content %}
+    <h2>Login</h2>
+    <div id="login-form" hx-target="this" hx-swap="outerHTML">
+        {% include "accounts/auth/partials/login_form.html" %}
+    </div>
+{% endblock %}

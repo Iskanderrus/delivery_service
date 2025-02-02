@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1>Users</h1>
+
+<!-- Create User Button -->
+<button hx-get="/users/htmx_create/" hx-trigger="click" hx-target="#user-form" hx-swap="innerHTML">
+    + Add User
+</button>
+
+<!-- User Form -->
+<div id="user-form"></div>
+
+<!-- User Table -->
+<table>
+    <thead>
+        <tr>
+            <th>Username</th>
+            <th>Email</th>
+            <th>Role</th>
+            <th>Company</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody id="user-table">
+        {% include "accounts/partials/user_list.html" %}
+    </tbody>
+</table>
+
+<!-- User Detail View -->
+<div id="user-detail"></div>
+{% endblock %}

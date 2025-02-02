@@ -1,0 +1,11 @@
+<tr id="user-{{ user.id }}">
+    <td>{{ user.username }}</td>
+    <td>{{ user.email }}</td>
+    <td>{{ user.company_name }}</td>
+    <td>{{ user.role }}</td>
+    <td>
+        <a href="{% url 'htmx_user_detail' user.id %}">View</a>
+        <a href="{% url 'htmx_user_update' user.id %}">Edit</a>
+        <a hx-delete="{% url 'htmx_user_delete' user.id %}" hx-target="#user-{{ user.id }}" hx-swap="outerHTML">Delete</a>
+    </td>
+</tr>
