@@ -59,11 +59,13 @@
                 <h5 class="modal-title" id="editUserModalLabel">Edit User</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <div class="modal-body" id="editUserModalBody">
-                <!-- Form content will be injected here by HTMX -->
+            <div class="modal-body" id="edit-user-content">
+                {% include "accounts/partials/edit_user.html" %}
+
             </div>
         </div>
     </div>
 </div>
+
 
 {% endif %}

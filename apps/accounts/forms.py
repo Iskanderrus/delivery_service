@@ -14,7 +14,14 @@ class CustomUserCreationForm(forms.ModelForm):
 
     class Meta:
         model = CustomUser
-        fields = ["username", "email", "first_name", "last_name", "role"]
+        fields = [
+            "username",
+            "email",
+            "first_name",
+            "last_name",
+            "company_name",
+            "role",
+        ]
 
     def __init__(self, *args, **kwargs):
         instance = kwargs.get("instance", None)

@@ -1,8 +1,12 @@
 {% load crispy_forms_tags %}
 <div class="modal-body">
-    <form method="POST" action="{% url 'accounts:edit_user' user.id %}">
+    <form method="POST"
+          hx-post="{% url 'accounts:edit_user' user.id %}"
+          hx-target="#user-{{ user.id }}"
+          hx-swap="outerHTML"
+          hx-on::after-request="bootstrap.Modal.getInstance(document.getElementById('editUserModal')).hide()">
         {% csrf_token %}
-        {{form|crispy}}
+        {{ form|crispy }}
         <button type="submit" class="btn btn-primary">Save</button>
     </form>
 </div>

@@ -22,8 +22,7 @@ logger = logging.getLogger(__name__)
 
 
 def index_page(request):
-    # users = CustomUser.objects.all()
-    return render(request, "accounts/index.html")#, {"users": users})
+    return render(request, "accounts/index.html")
 
 
 class CustomUserViewSet(viewsets.ModelViewSet):
@@ -122,14 +121,14 @@ def logout_user(request):
 def user_list_page(request):
     if request.user.is_authenticated():
         if request.user.is_superuser():
-            users = CustomUser.objects.filter(is_active=True)
+            users = CustomUser.objects.filter(is_active=True).exclude(role="admin")
     return render(request, "accounts/user_list.html", {"users": users})
 
 
 def htmx_user_list(request):
     """Returns a list of users via HTMX, filtered to active users, only for superusers"""
     if request.user.is_superuser:
-        users = CustomUser.objects.filter(is_active=True)
+        users = CustomUser.objects.filter(is_active=True).exclude(role="admin")
         return render(request, "accounts/partials/user_list.html", {"users": users})
     else:
         return HttpResponseForbidden("You do not have permission to view this page.")
@@ -166,7 +165,9 @@ def create_user(request):
                 else:
                     user.save()
                     messages.success(request, "User created successfully.")
-                    users = CustomUser.objects.filter(is_active=True)
+                    users = CustomUser.objects.filter(is_active=True).exclude(
+                        role="admin"
+                    )
 
                     return render(
                         request,
@@ -184,29 +185,20 @@ def create_user(request):
 def edit_user(request, pk):
     user = get_object_or_404(CustomUser, id=pk)
 
-    if request.method == "GET":
-        form = CustomUserCreationForm(instance=user)
-        return render(
-            request, "accounts/partials/edit_user.html", {"form": form, "user": user}
-        )
-
-    elif request.method == "POST":
+    if request.method == "POST":
         form = CustomUserCreationForm(request.POST, instance=user)
         if form.is_valid():
             user = form.save()
-            users = CustomUser.objects.filter(is_active=True)
+            return render(request, "accounts/partials/user_row.html", {"user": user})
 
-            return render(
-                request,
-                "accounts/partials/user_row.html",
-                {"user": user, "users": users},
-            )
-        else:
-            return render(
-                request,
-                "accounts/partials/edit_user.html",
-                {"form": form, "user": user},
-            )
+    else:
+        form = CustomUserCreationForm(instance=user)
+
+    return render(
+        request,
+        "accounts/partials/edit_user.html",
+        {"form": form, "user": user},
+    )
 
 
 @require_http_methods(["DELETE"])

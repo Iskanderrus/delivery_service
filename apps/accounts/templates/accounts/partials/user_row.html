@@ -1,16 +1,22 @@
   <tr id="user-{{ user.id }}" class="align-middle">
     <td class="align-middle">{{ user.username }}</td>
     <td class="align-middle">{{ user.email }}</td>
-    <td class="align-middle">{{ user.company_name|default:"-" }}</td>
+    <td class="align-middle">{{ user.first_name|default:"" }} {{ user.last_name|default:"" }}</td>
+    <td class="align-middle">{{ user.company_name|default:"" }}</td>
     <td class="align-middle">
         <span class="badge {% if user.role == 'shop' %}bg-primary{% elif user.role == 'driver' %}bg-success{% elif user.role == 'customer' %}bg-info{% else %}bg-secondary{% endif %}">{{ user.role|title }}</span>
     </td>
     <td class="align-middle">
       <div class="d-flex gap-2 justify-content-end">
         <a href="{% url 'accounts:user_detail' user.id %}" class="btn btn-sm btn-outline-info">View</a>
-        <button class="btn btn-primary" hx-get="{% url 'accounts:edit_user' user.id %}" hx-target="#editUserModalBody" hx-swap="outerHTML" data-bs-toggle="modal" data-bs-target="#editUserModal">
-          Edit
-      </button>
+        <a href="{% url 'accounts:edit_user' user.id %}" class="btn btn-warning"
+          hx-get="{% url 'accounts:edit_user' user.id %}"
+          hx-target="#edit-user-content"
+          hx-trigger="click"
+          data-bs-toggle="modal"
+          data-bs-target="#editUserModal">
+            Edit
+        </a>
               <button
             hx-delete="{% url 'accounts:htmx_user_delete' user.id %}"
             hx-target="#user-list"
