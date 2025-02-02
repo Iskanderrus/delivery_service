@@ -12,6 +12,6 @@ echo "PostgreSQL is up!"
 python manage.py runserver 0.0.0.0:8000 &
 
 # Start Celery worker in background
-celery -A delivery_service worker --loglevel=info &
+celery -A delivery_service worker --loglevel=debug &
 
 wait

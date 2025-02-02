@@ -153,6 +153,9 @@ class CustomUser(AbstractUser, PermissionsMixin):
 
 
 class DriverProfile(models.Model):
+    class Meta:
+        indexes = [models.Index(fields=["capacity"])]
+
     user = models.OneToOneField(
         CustomUser,
         on_delete=models.CASCADE,
