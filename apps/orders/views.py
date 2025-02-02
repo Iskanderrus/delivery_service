@@ -6,9 +6,6 @@ class CreateOrderView(CreateView):
     pass
 
 
-class UpdateOrderView(UpdateView):
+class UpdateOrderStatusView(UpdateView):
     pass
 
-
-class DeleteOrderView(DeleteView):
-    pass

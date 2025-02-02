@@ -1,7 +1,9 @@
+from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
+from django.utils.translation import gettext_lazy as _
+
 from apps.accounts.models import CustomUser
 from apps.products.models import Product
-from django.utils.translation import gettext_lazy as _
 
 
 class OrderItem(models.Model):
@@ -22,6 +24,7 @@ class Order(models.Model):
         ("created", _("Order created")),
         ("submitted", _("Order submitted")),
         ("pending", _("Order pending")),
+        ("ready_to_collect", _("Order ready to collect")),
         ("assigned", _("Order assigned")),
         ("in_transit", _("Order in transit")),
         ("delivered", _("Order delivered")),
@@ -31,6 +34,10 @@ class Order(models.Model):
     )
     delivery_price = models.DecimalField(
         _("Delivery price"), max_digits=10, decimal_places=10, default=0
+    )
+    total_weight = models.FloatField(
+        default=0,
+        validators=[MinValueValidator(0.0), MaxValueValidator(1000.0)],
     )
     shop = models.ForeignKey(
         CustomUser,
