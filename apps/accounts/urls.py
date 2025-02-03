@@ -1,5 +1,8 @@
 from django.urls import include, path
 from rest_framework.routers import DefaultRouter
+from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
+from django.urls import path
+
 
 from .views import (
     CustomUserViewSet,
@@ -25,6 +28,8 @@ router = DefaultRouter()
 router.register(r"users", CustomUserViewSet)
 
 urlpatterns = [
+    path("api/token/", TokenObtainPairView.as_view(), name="token_obtain_pair"),
+    path("api/token/refresh/", TokenRefreshView.as_view(), name="token_refresh"),
     path("", index_page, name="index"),
     path("accounts/", include(router.urls)),  # API
     path("accounts/users/", user_list_page, name="user-list-page"),

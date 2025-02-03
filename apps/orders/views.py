@@ -1,10 +1,11 @@
 from django.contrib.auth.decorators import login_required, user_passes_test
+from django.db.models import Q
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
 from rest_framework import status
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
-from django.db.models import Q
 
 from .models import CustomUser, Order, OrderItem, Product
 from .serializers import OrderSerializer
@@ -82,6 +83,7 @@ def create_order_from_product(request, product_id):
     )
 
 
+@permission_classes([IsAuthenticated])
 @api_view(["GET", "POST"])
 def order_list(request):
     if request.method == "GET":
@@ -96,7 +98,7 @@ def order_list(request):
         elif role == "driver":
             orders = Order.objects.filter(driver=request.user)
         else:
-            orders = Order.objects.none() 
+            orders = Order.objects.none()
 
         serializer = OrderSerializer(orders, many=True)
         return Response(serializer.data)

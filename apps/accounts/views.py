@@ -9,11 +9,12 @@ from django.template.loader import render_to_string
 from django.views.decorators.http import require_http_methods, require_POST
 from rest_framework import permissions, viewsets
 from rest_framework.decorators import action
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
 from apps.accounts.forms import (
-    CustomUserCreationForm,
     CustomerProfileForm,
+    CustomUserCreationForm,
     DriverProfileForm,
     LoginForm,
     ShopProfileForm,
@@ -214,6 +215,7 @@ def edit_user(request, pk):
         "accounts/partials/edit_user.html",
         {"form": form, "user": user},
     )
+
 
 @login_required
 @superuser_required

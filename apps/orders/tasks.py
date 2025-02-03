@@ -1,7 +1,7 @@
 from __future__ import absolute_import
 
 from celery import shared_task
-from celery.exceptions import TaskRetry
+from celery.exceptions import Retry
 
 from apps.accounts.models import CustomUser
 from apps.orders.models import Order
@@ -12,11 +12,11 @@ def assign_driver(order_id):
     try:
         order = Order.objects.get(id=order_id)
     except Order.DoesNotExist:
-        raise TaskRetry("Order not found", exc=None)
+        raise Retry("Order not found", exc=None)
 
     # Check if the order is really in 'ready_to_collect' status
     if order.status != "ready_to_collect":
-        raise TaskRetry(
+        raise Retry(
             f"Order {order_id} is not in 'ready_to_collect' status", exc=None
         )
 
@@ -33,4 +33,4 @@ def assign_driver(order_id):
         order.status = "assigned"
         order.save()
     else:
-        raise TaskRetry("No available driver for the order", exc=None)
+        raise Retry("No available driver for the order", exc=None)
