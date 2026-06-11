@@ -1,0 +1,42 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - name: Install system dependencies
+        run: sudo apt-get update && sudo apt-get install -y libpq-dev
+      - name: Install Python dependencies
+        run: pip install -r requirements.txt
+      - name: Syntax check
+        run: python -m compileall -q apps delivery_service manage.py
+
+  # TODO: enable once an env-driven delivery_service/settings.py is committed.
+  # test:
+  #   runs-on: ubuntu-latest
+  #   services:
+  #     postgres:
+  #       image: postgres:16
+  #       env: { POSTGRES_DB: test, POSTGRES_USER: test, POSTGRES_PASSWORD: test }
+  #       ports: ["5432:5432"]
+  #     redis:
+  #       image: redis:alpine
+  #       ports: ["6379:6379"]
+  #   steps:
+  #     - uses: actions/checkout@v4
+  #     - uses: actions/setup-python@v5
+  #       with: { python-version: "3.12", cache: pip }
+  #     - run: sudo apt-get update && sudo apt-get install -y libpq-dev
+  #     - run: pip install -r requirements.txt
+  #     - run: python manage.py test tests
