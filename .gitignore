@@ -62,7 +62,6 @@ local_settings.py   # If local_settings is not located in settings folder.
 .env
 .env.*
 .devcontainer
-.github
 secrets.json
 credentials.json
 settings.py
